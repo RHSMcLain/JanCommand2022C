@@ -10,8 +10,13 @@ import edu.wpi.first.wpilibj.XboxController;
 import frc.robot.commands.AutoCommand;
 import frc.robot.commands.DriveCommand;
 import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.subsystems.PneumaticSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -25,6 +30,8 @@ public class RobotContainer {
   private Joystick m_joystick = new Joystick(0);
   private final DriveCommand m_driveCommand = new DriveCommand(m_driveSubsystem,m_joystick);
   private final AutoCommand m_autoCommand = new AutoCommand(m_driveSubsystem);
+  private final PneumaticSubsystem m_pneum = new PneumaticSubsystem();
+  private final JoystickButton ejectButton = new JoystickButton(m_joystick, 1);
   
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -40,7 +47,11 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-
+    ejectButton.whenPressed(new SequentialCommandGroup(
+      new InstantCommand(m_pneum::push, m_pneum),
+      new WaitCommand(2), 
+      new InstantCommand(m_pneum::pull, m_pneum)
+    ));
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
    *
